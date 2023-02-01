@@ -1,16 +1,30 @@
+import logo from "../../public/knights_snippet.png";
+import Image from "next/image";
+import Link from "next/link";
 
 export interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = () => {
   return (
-    <div className="w-full h-16 bg-gray-900 shadow">
-      <div className="flex items-center justify-between py-4 px-10">
-        <div className="text-white font-bold text-xl flex items-center">
-          Rollcall
+    <>
+      <div className="w-full h-24 bg-black shadow">
+        <div className="flex items-center pt-2">
+          <Image
+            src={logo}
+            alt="knights_logo"
+            width={85}
+            height={85}
+            className="ml-2"
+          />
+          <Link href="/">
+            <button>
+              <h1 className="text-white text-3xl font-bold">Rollcall</h1>
+            </button>
+          </Link>
         </div>
       </div>
-      <div className="h-2 w-full bg-blue-600"></div>
-    </div>
+      <div className="h-2 w-full bg-blue-700"></div>
+    </>
   );
 };
 
