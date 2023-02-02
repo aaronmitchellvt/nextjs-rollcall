@@ -1,4 +1,5 @@
 import supabase from "@/lib/supabase";
+import { useSession, useUser } from "@supabase/auth-helpers-react";
 import Head from "next/head";
 import { useQuery } from "react-query";
 import SignIn from "../SignIn";
@@ -12,7 +13,7 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
     const { data } = await supabase.auth.getUser();
     return data;
   };
-  //Call fetchUser and "wrap" the promise using react query to drive the UI
+  // Call fetchUser and "wrap" the promise using react query to drive the UI
   const { data, isLoading, isError } = useQuery({
     queryKey: ["user"],
     queryFn: () => fetchUser(),
@@ -20,15 +21,17 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
   const isLoggedIn = data?.user !== null && !isLoading && !isError;
   console.log("isLoggedIn: ", isLoggedIn);
 
+  if (isLoading) {
+    return <></>;
+  }
+
   //What you see in the browser
   let pageContent: React.ReactNode = <></>;
-  if (isLoading) {
-    pageContent = <h1>Loading..</h1>;
-  } else if (!isLoggedIn) {
+  if (!isLoggedIn) {
     pageContent = (
-      <>
+      <div className="flex flex-col items-center mt-4">
         <SignIn />
-      </>
+      </div>
     );
   } else if (isLoggedIn) {
     pageContent = children;

@@ -8,12 +8,12 @@ const Navbar: React.FC<NavbarProps> = () => {
   return (
     <>
       <div className="w-full h-24 bg-black shadow">
-        <div className="flex items-center pt-2">
+        <div className="flex items-center py-2">
           <Image
             src={logo}
             alt="knights_logo"
-            width={85}
-            height={85}
+            width={82}
+            height={82}
             className="ml-2"
           />
           <Link href="/">

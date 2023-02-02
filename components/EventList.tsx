@@ -1,6 +1,7 @@
 import supabase from "@/lib/supabase";
 import { useQuery } from "react-query";
-import EventTile from "./EventTile";
+import EventTile from "./EventTiles/EventTile";
+import LoadingEventTile from "./EventTiles/LoadingEventTile";
 
 export interface EventListProps {}
 
@@ -15,23 +16,29 @@ const EventList: React.FC<EventListProps> = () => {
     queryFn: () => fetchEvents(),
   });
 
-  if(isError) {
+  if (isError) {
     return <h1>Uh oh, there was en error getting events..</h1>;
   }
 
   if (isLoading) {
-    return <h1>Fetching events..</h1>;
+    return (
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4 mx-2">
+        <LoadingEventTile />
+        <LoadingEventTile />
+        <LoadingEventTile />
+      </div>
+    );
   }
 
   const events = data?.map((event) => {
-    return (
-      <EventTile title={event.title} date={event.date} id={event.id} />
-    )
-  })
+    return <EventTile title={event.title} date={event.date} id={event.id} />;
+  });
 
-  return <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4 mx-2">
-    {events}
-  </div>;
+  return (
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4 mx-2">
+      {events}
+    </div>
+  );
 };
 
 export default EventList;

@@ -1,3 +1,5 @@
+import JoinedDivisionGroup from "@/components/JoinedDivisionGroup";
+import JoinedPlayer from "@/components/JoinedPlayer";
 import PrimaryLayout from "@/components/layout/PrimaryLayout";
 import supabase from "@/lib/supabase";
 import { useRouter } from "next/router";
@@ -49,28 +51,49 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
     return <h1>Fetching event details..</h1>;
   }
 
+  //Add Event name and date
+  //Add form, are you in (fontawesome check green bg) Or out (red ex)
+  //Idea, green bg color if player is in, red if out,
+  //add loading spinner when in or out is clicked while post being made
+
   return (
-    <div className="bg-gray-200 h-screen flex flex-col items-center pt-3">
-      <h1 className="text-2xl font-semibold">
-        {eventData![0].title} on {eventData![0].date}
-      </h1>
-      <h2 className="text-xl">These players will be there</h2>
-      <ul>
-        {data?.map((user) => {
-          return <li>id: {user.user_id}</li>
-        })}
-      </ul>
-    </div>
+    <PrimaryLayout>
+      <div className="bg-white h-screen flex flex-col items-center pt-3 w-full">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-1 ml-12 mr-12">
+        {divisionTwoGroup}
+        {divisionThreeGroup}
+        {divisionFourGroup}
+        </div>
+      </div>
+    </PrimaryLayout>
   );
 };
 
 export default EventDetails;
-
-EventDetails.getLayout = (page) => {
-  return <PrimaryLayout>{page}</PrimaryLayout>;
-};
-
 export interface eventDetails {
   title?: string;
   date?: string;
 }
+
+const mockDivisionTwoPlayers = [
+  <JoinedPlayer name="aaron mitchell" />,
+  <JoinedPlayer name="aaron mitchell" />,
+  <JoinedPlayer name="aaron mitchell" />,
+  <JoinedPlayer name="aaron mitchell" />,
+  <JoinedPlayer name="aaron mitchell" />,
+  <JoinedPlayer name="aaron mitchell" />,
+  <JoinedPlayer name="aaron mitchell" />,
+  <JoinedPlayer name="aaron mitchell" />,
+];
+
+const divisionTwoGroup = (
+  <JoinedDivisionGroup division={2} players={mockDivisionTwoPlayers} />
+);
+
+const divisionThreeGroup = (
+  <JoinedDivisionGroup division={3} players={mockDivisionTwoPlayers} />
+);
+
+const divisionFourGroup = (
+  <JoinedDivisionGroup division={4} players={mockDivisionTwoPlayers} />
+);
