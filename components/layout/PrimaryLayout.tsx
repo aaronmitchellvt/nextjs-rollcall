@@ -42,7 +42,7 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
         <title>Rollcall</title>
       </Head>
       <Navbar />
-      <main className="flex flex-col h-screen w-full justify-between">
+      <main className="flex flex-col h-screen w-full justify-between overflow-y-scroll mb-3">
         {pageContent}
       </main>
       <Footer />
