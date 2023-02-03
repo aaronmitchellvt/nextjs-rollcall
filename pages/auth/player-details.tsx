@@ -2,7 +2,6 @@ import PrimaryLayout from "@/components/layout/PrimaryLayout";
 import supabase from "@/lib/supabase";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { stringify } from "querystring";
 import { useState } from "react";
 import { useMutation } from "react-query";
 
@@ -63,7 +62,10 @@ const PlayerDetails: React.FC<PlayerDetailsProps> = () => {
             </label>
             <select
               onChange={(e) =>
-                setUserPayload({ ...userPayload, division: Number(e.target.value) })
+                setUserPayload({
+                  ...userPayload,
+                  division: Number(e.target.value),
+                })
               }
               value={userPayload.division}
               className="border-2 rounded p-1"
