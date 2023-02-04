@@ -111,7 +111,7 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
           <>
             <Navbar />
             <main className="flex flex-col h-screen w-full justify-between items-center overflow-y-scroll mb-3">
-              <div className="w-full sm:w-2/3 lg:w-1/3">
+              <div className="w-4/5 sm:w-2/3 lg:w-1/3 mx-8">
                 <Auth
                   supabaseClient={supabase}
                   appearance={{
