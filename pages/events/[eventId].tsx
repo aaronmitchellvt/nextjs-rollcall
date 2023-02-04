@@ -8,22 +8,19 @@ import supabase from "@/lib/supabase";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { QueryClient, useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { NextPageWithLayout } from "../page";
 
 export interface EventDetailsProps {}
 
 const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const eventId = router.query.eventId;
-  console.log("eventId: ", eventId);
   const session = useSession();
 
   //Fetch event details
   const fetchEventDetails = async () => {
     let { data } = await supabase.from("Events").select("*").eq("id", eventId);
-    console.log("sql data: ", data);
     return data;
   };
   const {
@@ -34,7 +31,6 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
     queryKey: ["eventDetails"],
     queryFn: () => fetchEventDetails(),
     enabled: !!eventId,
-    onSuccess: () => queryClient.invalidateQueries(["hasUserPosted"]),
   });
 
   //Fetch joined players
@@ -45,12 +41,7 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
       .eq("event_id", eventId);
     return data;
   };
-  const [joinedPlayers, setJoinedPlayers] = useState<IJoinedPlayers>({
-    divisionTwo: [],
-    divisionThree: [],
-    divisionFour: [],
-    divisionFive: [],
-  });
+
   const {
     isError: joinedPlayersIsError,
     isLoading: joinedPlayersIsLoading,
@@ -59,39 +50,21 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
     queryKey: ["eventPlayers"],
     queryFn: () => fetchEventPlayers(),
     enabled: !!eventId,
-    onSuccess: () => {
-      // joinedPlayersData.
-      // setDivisionTwoPlayers([..., ])
-      console.log("hit on success");
-      // console.log("joinedPlayersData: ", joinedPlayersData)
-    },
+  });
+  const divisionTwoPlayers = joinedPlayersData?.filter((player) => {
+    return player.user_division === 2;
+  });
+  const divisionThreePlayers = joinedPlayersData?.filter((player) => {
+    return player.user_division === 3;
+  });
+  const divisionFourPlayers = joinedPlayersData?.filter((player) => {
+    return player.user_division === 4;
+  });
+  const divisionFivePlayers = joinedPlayersData?.filter((player) => {
+    return player.user_division === 5;
   });
 
-  //todo - not working properly
-  const test = [<JoinedPlayer name="test" isIn={true} />]
-  const divisionTwoPlayerTiles = joinedPlayersData?.map((player) => {
 
-    console.log("player in map: ", player);
-    if (player.division === 2) {
-      return <JoinedPlayer name={player.user_name} isIn={player.isIn} />;
-    } else {
-      return <JoinedPlayer name="test" isIn={true} />
-    }
-  });
-
-  console.log(
-    "event data: ",
-    eventData,
-    "\n",
-    "player data: ",
-    joinedPlayersData
-  );
-
-  //Add form, are you in (fontawesome check green bg) Or out (red ex)
-  //Idea, green bg color if player is in, red if out,
-  //add loading spinner when in or out is clicked while post being made
-
-  console.log("eventLoading: ", eventIsLoading);
   return (
     <PrimaryLayout>
       <FetchedData
@@ -135,11 +108,21 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
             <div className="bg-white h-screen flex flex-col items-center pt-3 w-full">
               <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-1 ml-12 mr-12">
                 <JoinedDivisionGroup
-                  players={divisionTwoPlayerTiles ? divisionTwoPlayerTiles : test}
+                  players={divisionTwoPlayers}
                   division={2}
                 />
-                {divisionThreeGroup}
-                {divisionFourGroup}
+                <JoinedDivisionGroup
+                  players={divisionThreePlayers}
+                  division={3}
+                />
+                <JoinedDivisionGroup
+                  players={divisionFourPlayers}
+                  division={4}
+                />
+                <JoinedDivisionGroup
+                  players={divisionFivePlayers}
+                  division={5}
+                />
               </div>
             </div>
           </>
@@ -155,32 +138,3 @@ export interface eventDetails {
   date?: string;
 }
 
-export interface IJoinedPlayers {
-  divisionTwo: any[];
-  divisionThree: any[];
-  divisionFour: any[];
-  divisionFive: any[];
-}
-
-const mockDivisionTwoPlayers = [
-  <JoinedPlayer name="aaron mitchell" isIn={true} />,
-  <JoinedPlayer name="aaron mitchell" isIn={true} />,
-  <JoinedPlayer name="aaron mitchell" isIn={false} />,
-  <JoinedPlayer name="aaron mitchell" isIn={true} />,
-  <JoinedPlayer name="aaron mitchell" isIn={true} />,
-  <JoinedPlayer name="aaron mitchell" isIn={false} />,
-  <JoinedPlayer name="aaron mitchell" isIn={false} />,
-  <JoinedPlayer name="aaron mitchell" isIn={true} />,
-];
-
-const divisionTwoGroup = (
-  <JoinedDivisionGroup division={2} players={mockDivisionTwoPlayers} />
-);
-
-const divisionThreeGroup = (
-  <JoinedDivisionGroup division={3} players={mockDivisionTwoPlayers} />
-);
-
-const divisionFourGroup = (
-  <JoinedDivisionGroup division={4} players={mockDivisionTwoPlayers} />
-);

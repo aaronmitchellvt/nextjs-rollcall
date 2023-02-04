@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import supabase from "@/lib/supabase";
 import FetchedData from "./FetchedData";
 import { useSession } from "@supabase/auth-helpers-react";
@@ -12,6 +12,8 @@ export interface JoinEventFormProps {
 
 const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
   const session = useSession();
+  const queryClient = useQueryClient();
+
   //check if the user has already posted
   const checkIfUserHasAlreadyPosted = async () => {
     const response = await supabase
@@ -29,23 +31,19 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
     queryKey: ["hasUserPosted"],
     queryFn: () => checkIfUserHasAlreadyPosted(),
   });
-  //want true for displaying form
-  const initialCheckIsValidData = initialCheckData !== undefined && initialCheckData.data?.length !== 1;
+  const initialCheckIsValidData =
+    initialCheckData !== undefined && initialCheckData.data?.length !== 1;
 
-  const getUserProfile = async() => {
-    let { data } = await supabase
-  .from('Player')
-  .select('*').eq("id", userId);
-  return data
-  }
+  const getUserProfile = async () => {
+    let { data } = await supabase.from("Player").select("*").eq("id", userId);
+    return data;
+  };
 
   const getPlayerProfileQuery = useQuery({
     queryKey: ["getPlayerProfile"],
     queryFn: () => getUserProfile(),
-    enabled: !!session?.user.id
-  })
-
-  console.log("getPlayerProfileQuery data: ", getPlayerProfileQuery.data);
+    enabled: !!session?.user.id,
+  });
 
   const eventIdNum = Number(eventId);
   //User IS attending logic
@@ -56,13 +54,17 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
         isIn: true,
         user_name: "Aaron",
         user_id: userId,
-        user_division: getPlayerProfileQuery?.data![0].division
+        user_division: getPlayerProfileQuery?.data![0].division,
       },
     ]);
     return response;
   };
   const attendingEventMutation = useMutation({
     mutationFn: () => onWillAttend(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["hasUserPosted"])
+      queryClient.refetchQueries(["eventPlayers"])
+    }
   });
 
   //User is NOT attending logic
@@ -73,14 +75,19 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
         isIn: false,
         user_name: "Aaron",
         user_id: userId,
-        user_division: getPlayerProfileQuery?.data![0].division
+        user_division: getPlayerProfileQuery?.data![0].division,
       },
     ]);
     return response;
   };
   const notAttendingEventMutation = useMutation({
     mutationFn: () => onNotAttending(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["hasUserPosted"])
+      queryClient.refetchQueries(["eventPlayers"])
+    }
   });
+  const postRequestIsLoading = attendingEventMutation.isLoading || notAttendingEventMutation.isLoading;
 
   return (
     <FetchedData
@@ -117,6 +124,16 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
               style={{ fontSize: 35, color: "red" }}
             />
           </button>
+          {/* Show spinner when the request is being made */}
+          {postRequestIsLoading && (
+            <div className="ml-2 flex justify-center items-center">
+              <div
+                className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+                role="status"
+              >
+              </div>
+            </div>
+          )}
         </div>
       }
     ></FetchedData>

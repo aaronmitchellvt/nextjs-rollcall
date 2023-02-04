@@ -22,7 +22,7 @@ const EventList: React.FC<EventListProps> = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4 mx-2">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4">
         <LoadingEventTile />
         <LoadingEventTile />
         <LoadingEventTile />
@@ -35,7 +35,7 @@ const EventList: React.FC<EventListProps> = () => {
   });
 
   return (
-    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4 mx-2">
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-4">
       {events}
     </div>
   );
