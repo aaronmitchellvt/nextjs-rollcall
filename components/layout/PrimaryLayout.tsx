@@ -2,13 +2,15 @@ import supabase from "@/lib/supabase";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
 import Head from "next/head";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import FetchedData from "../FetchedData";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 
-export interface IPrimaryLayout {}
+export interface IPrimaryLayout {
+  children: React.ReactNode
+}
 
 const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
   const session = useSession();
@@ -99,7 +101,7 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
             <Navbar />
             <main className="flex flex-col h-screen w-full justify-between overflow-y-scroll">
               <h1 className="text-2xl text-center">
-                Sorry, there's been an error on Aaron's end..
+                Sorry, there has been an error on Aarons end..
               </h1>
             </main>
             <Footer />

@@ -11,7 +11,7 @@ const JoinedDivisionGroup: React.FC<JoinedDivisionGroupProps> = ({
 }) => {
 
   const playerTiles = players?.map((player) => {
-    return <JoinedPlayer name={player.user_name} isIn={player.isIn} />;
+    return <JoinedPlayer name={player.user_name} isIn={player.isIn} key={player.user_name} />;
   })
 
   return (

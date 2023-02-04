@@ -3,11 +3,9 @@ import type { AppProps } from "next/app";
 import { NextPageWithLayout } from "./page";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { SessionContextProvider, Session } from "@supabase/auth-helpers-react";
+import { SessionContextProvider, Session } from '@supabase/auth-helpers-react';
 import { useState } from "react";
 import "@fortawesome/fontawesome-svg-core/styles.css"; 
-// Tell Font Awesome to skip adding the CSS automatically 
-// since it's already imported above
 
 interface AppPropsWithLayout extends AppProps {
   Component: NextPageWithLayout;

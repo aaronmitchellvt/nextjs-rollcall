@@ -39,7 +39,7 @@ const PlayerDetails: React.FC<PlayerDetailsProps> = () => {
   if (playerDetailsMutation.isError) {
     return (
       <h1 className="text-xl">
-        Oop's there was an error saving your details. Try again later.
+        Oops there was an error saving your details. Try again later.
       </h1>
     );
   }

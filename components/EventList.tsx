@@ -31,7 +31,7 @@ const EventList: React.FC<EventListProps> = () => {
   }
 
   const events = data?.map((event) => {
-    return <EventTile title={event.title} date={event.date} id={event.id} />;
+    return <EventTile title={event.title} date={event.date} id={event.id} key={event.id} />;
   });
 
   return (
