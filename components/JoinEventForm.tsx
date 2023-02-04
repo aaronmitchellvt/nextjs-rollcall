@@ -52,7 +52,7 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
       {
         event_id: eventIdNum,
         isIn: true,
-        user_name: "Aaron",
+        user_name: getPlayerProfileQuery?.data![0].name,
         user_id: userId,
         user_division: getPlayerProfileQuery?.data![0].division,
       },
@@ -73,7 +73,7 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
       {
         event_id: eventIdNum,
         isIn: false,
-        user_name: "Aaron",
+        user_name: getPlayerProfileQuery?.data![0].name,
         user_id: userId,
         user_division: getPlayerProfileQuery?.data![0].division,
       },

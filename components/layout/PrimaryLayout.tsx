@@ -170,7 +170,6 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
                                 name: e.target.value,
                               })
                             }
-                            placeholder="Lebron James"
                             className="border-2 rounded p-1"
                             value={userPayload.name}
                           />
