@@ -1,5 +1,6 @@
 import supabase from "../lib/supabase";
 import { useState } from "react";
+import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
 
 interface SignInOrCreateAccountProps {}
 
@@ -28,46 +29,42 @@ const SignInOrCreateAccount: React.FC<SignInOrCreateAccountProps> = () => {
 
   return (
     <>
-      {!hasSubmitted ? (
-        <form
-          className="bg-white w-full sm:w-2/3 md:w-1/3 h-auto rounded p-6"
-          onSubmit={onCreateAccount}
-        >
-          <div className="flex flex-col">
-            <label className="text-xl font-semibold mt-3">Email</label>
-            <input
-              onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setUserPayload({ ...userPayload, email: e.target.value })
-              }
-              className="border-2 rounded p-1"
-              value={userPayload.email}
-            />
-
-            <label className="text-xl font-semibold mt-3">Password</label>
-            <input
-              type="password"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setUserPayload({ ...userPayload, password: e.target.value })
-              }
-              className="border-2 rounded p-1"
-              value={userPayload.password}
-            />
-
-            <button
-              className="p-2 mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white rounded"
-              type="submit"
-            >
-              Create Account
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="text-xl font-semibold">
-          Go check your email for a link
-        </div>
-      )}
+      <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
     </>
   );
 };
 
 export default SignInOrCreateAccount;
+
+// <form
+//   className="bg-white w-full sm:w-2/3 md:w-1/3 h-auto rounded p-6"
+//   onSubmit={onCreateAccount}
+// >
+//   <div className="flex flex-col">
+//     <label className="text-xl font-semibold mt-3">Email</label>
+//     <input
+//       onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
+//         setUserPayload({ ...userPayload, email: e.target.value })
+//       }
+//       className="border-2 rounded p-1"
+//       value={userPayload.email}
+//     />
+
+//     <label className="text-xl font-semibold mt-3">Password</label>
+//     <input
+//       type="password"
+//       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+//         setUserPayload({ ...userPayload, password: e.target.value })
+//       }
+//       className="border-2 rounded p-1"
+//       value={userPayload.password}
+//     />
+
+//     <button
+//       className="p-2 mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white rounded"
+//       type="submit"
+//     >
+//       Create Account
+//     </button>
+//   </div>
+// </form>
