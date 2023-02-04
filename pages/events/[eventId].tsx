@@ -106,7 +106,7 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
               <JoinEventForm eventId={eventId[0]} userId={session!.user.id} />
             )}
             <div className="bg-white h-screen flex flex-col items-center pt-3 w-full">
-              <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-1 ml-12 mr-12">
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-1 ml-12 mr-12 pb-2">
                 <JoinedDivisionGroup
                   players={divisionTwoPlayers}
                   division={2}

@@ -23,7 +23,7 @@ const JoinedDivisionGroup: React.FC<JoinedDivisionGroupProps> = ({
               Division: {String(division)}
             </h1>
           </div>
-          <div className="p-2 flex flex-col items-center bg-gray-100">
+          <div className="p-2 flex flex-col items-center">
             {players && playerTiles}
           </div>
         </div>
