@@ -1,4 +1,5 @@
 import supabase from "@/lib/supabase";
+import { checkPlayerDetails, fetchUser, onSubmitPlayerDetails } from "@/services/playerServices";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
 import Head from "next/head";
@@ -14,35 +15,23 @@ export interface IPrimaryLayout {
 
 const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
   const session = useSession();
+  const userId = session?.user.id;
   const queryClient = useQueryClient();
 
-  //Get the user from the session, if there is no user then null is returned
-  const fetchUser = async () => {
-    const { data } = await supabase.auth.getUser();
-    return data;
-  };
-  // Call fetchUser and "wrap" the promise using react query to drive the UI
   const { data, isLoading, isError } = useQuery({
     queryKey: ["user"],
     queryFn: () => fetchUser(),
   });
   const isLoggedIn = data?.user !== null && !isLoading && !isError;
 
-  //Ensuring the user has entered their player details
-  const checkPlayerDetails = async () => {
-    const response = await supabase
-      .from("Player")
-      .select("*")
-      .eq("id", session?.user.id);
-    return response;
-  };
+
   const {
     isLoading: playDetailsIsLoading,
     isError: playerDetailsIsError,
     data: playerDetailsData,
   } = useQuery({
     queryKey: ["checkPlayerDetails"],
-    queryFn: () => checkPlayerDetails(),
+    queryFn: () => checkPlayerDetails(userId),
     enabled: !!session?.user.id,
   });
   const playerDetailsIsValidData =
@@ -52,24 +41,12 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
     playerDetailsData?.data !== undefined &&
     playerDetailsData.data.length > 0;
 
-  const [userPayload, setUserPayload] = useState({
+  const [userPayload, setUserPayload] = useState<IUserPayload>({
     name: "",
     division: 2,
   });
-
-  const onSubmitPlayerDetails = async () => {
-    const response = await supabase.from("Player").insert([
-      {
-        id: session?.user.id,
-        name: userPayload.name,
-        division: userPayload.division,
-      },
-    ]);
-    return response;
-  };
-
   const playerDetailsMutation = useMutation({
-    mutationFn: () => onSubmitPlayerDetails(),
+    mutationFn: () => onSubmitPlayerDetails(userId, userPayload),
     onSuccess: () => {
       queryClient.refetchQueries(["checkPlayerDetails"]);
     },
@@ -216,3 +193,8 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
 };
 
 export default PrimaryLayout;
+
+export interface IUserPayload {
+  name: string,
+  division: number
+}
