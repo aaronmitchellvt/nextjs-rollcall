@@ -29,7 +29,7 @@ const SignInOrCreateAccount: React.FC<SignInOrCreateAccountProps> = () => {
 
   return (
     <>
-      <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
+      <Auth supabaseClient={supabase} />
     </>
   );
 };
