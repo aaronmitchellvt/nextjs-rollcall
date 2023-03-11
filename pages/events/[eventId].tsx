@@ -1,14 +1,12 @@
 import FetchedData from "@/components/FetchedData";
 import JoinedDivisionGroup from "@/components/JoinedDivisionGroup/JoinedDivisionGroup";
 import LoadingJoinedDivisionGroup from "@/components/JoinedDivisionGroup/LoadingJoinedDivisionGroup";
-import JoinedPlayer from "@/components/JoinedPlayer/JoinedPlayer";
 import JoinEventForm from "@/components/JoinEventForm";
 import PrimaryLayout from "@/components/layout/PrimaryLayout";
-import supabase from "@/lib/supabase";
+import { fetchEventDetails, fetchEventPlayers } from "@/services/eventServices";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import { NextPageWithLayout } from "../page";
 
 export interface EventDetailsProps {}
@@ -18,29 +16,15 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
   const eventId = router.query.eventId;
   const session = useSession();
 
-  //Fetch event details
-  const fetchEventDetails = async () => {
-    let { data } = await supabase.from("Events").select("*").eq("id", eventId);
-    return data;
-  };
   const {
     isError: eventIsError,
     isLoading: eventIsLoading,
     data: eventData,
   } = useQuery({
     queryKey: ["eventDetails"],
-    queryFn: () => fetchEventDetails(),
+    queryFn: () => fetchEventDetails(eventId),
     enabled: !!eventId,
   });
-
-  //Fetch joined players
-  const fetchEventPlayers = async () => {
-    let { data } = await supabase
-      .from("Joined_Players")
-      .select("*")
-      .eq("event_id", eventId);
-    return data;
-  };
 
   const {
     isError: joinedPlayersIsError,
@@ -48,7 +32,7 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
     data: joinedPlayersData,
   } = useQuery({
     queryKey: ["eventPlayers"],
-    queryFn: () => fetchEventPlayers(),
+    queryFn: () => fetchEventPlayers(eventId),
     enabled: !!eventId,
   });
   const divisionTwoPlayers = joinedPlayersData?.filter((player) => {
@@ -63,7 +47,6 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
   const divisionFivePlayers = joinedPlayersData?.filter((player) => {
     return player.user_division === 5;
   });
-
 
   return (
     <PrimaryLayout>
@@ -137,4 +120,3 @@ export interface eventDetails {
   title?: string;
   date?: string;
 }
-

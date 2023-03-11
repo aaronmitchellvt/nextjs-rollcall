@@ -26,3 +26,12 @@ export async function onSubmitPlayerDetails (userId: any, userPayload: IUserPayl
   ]);
   return response;
 };
+
+export async function checkIfUserHasAlreadyPosted (userId: any, eventId: any) {
+  const response = await supabase
+    .from("Joined_Players")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("event_id", eventId);
+  return response;
+};
