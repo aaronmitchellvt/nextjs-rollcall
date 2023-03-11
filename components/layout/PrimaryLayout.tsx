@@ -3,6 +3,7 @@ import { checkPlayerDetails, fetchUser, onSubmitPlayerDetails } from "@/services
 import { useSession } from "@supabase/auth-helpers-react";
 import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import FetchedData from "../FetchedData";
@@ -14,6 +15,7 @@ export interface IPrimaryLayout {
 }
 
 const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
+  const router = useRouter();
   const session = useSession();
   const userId = session?.user.id;
   const queryClient = useQueryClient();
@@ -49,6 +51,7 @@ const PrimaryLayout: React.FC<IPrimaryLayout> = ({ children }) => {
     mutationFn: () => onSubmitPlayerDetails(userId, userPayload),
     onSuccess: () => {
       queryClient.refetchQueries(["checkPlayerDetails"]);
+      router.reload();
     },
   });
 

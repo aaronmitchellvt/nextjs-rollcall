@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import supabase from "@/lib/supabase";
 import FetchedData from "./FetchedData";
 import { useSession } from "@supabase/auth-helpers-react";
+import { checkIfUserHasAlreadyPosted } from "@/services/playerServices";
 
 export interface JoinEventFormProps {
   eventId: string;
@@ -14,22 +15,13 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
-  //check if the user has already posted
-  const checkIfUserHasAlreadyPosted = async () => {
-    const response = await supabase
-      .from("Joined_Players")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("event_id", eventId);
-    return response;
-  };
   const {
     isLoading: initialCheckLoading,
     isError: initialCheckIsError,
     data: initialCheckData,
   } = useQuery({
     queryKey: ["hasUserPosted"],
-    queryFn: () => checkIfUserHasAlreadyPosted(),
+    queryFn: () => checkIfUserHasAlreadyPosted(userId, eventId),
   });
   const initialCheckIsValidData =
     initialCheckData !== undefined && initialCheckData.data?.length !== 1;
