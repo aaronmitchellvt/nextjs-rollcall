@@ -1,0 +1,49 @@
+PrimaryLayout
+  const session = useSession();
+  const userId = session?.user.id;
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["user"],
+    queryFn: () => fetchUser(),
+  });
+  const isLoggedIn = data?.user !== null && !isLoading && !isError;
+
+
+  const {
+    isLoading: playDetailsIsLoading,
+    isError: playerDetailsIsError,
+    data: playerDetailsData,
+  } = useQuery({
+    queryKey: ["checkPlayerDetails"],
+    queryFn: () => checkPlayerDetails(userId),
+    enabled: !!session?.user.id,
+  });
+  const playerDetailsIsValidData =
+    !playDetailsIsLoading &&
+    !playerDetailsIsError &&
+    playerDetailsData?.data !== null &&
+    playerDetailsData?.data !== undefined &&
+    playerDetailsData.data.length > 0;
+
+  const [userPayload, setUserPayload] = useState<IUserPayload>({
+    name: "",
+    division: 2,
+  });
+  const playerDetailsMutation = useMutation({
+    mutationFn: () => onSubmitPlayerDetails(userId, userPayload),
+    onSuccess: () => {
+      queryClient.refetchQueries(["checkPlayerDetails"]);
+      router.reload();
+    },
+  });
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    playerDetailsMutation.mutate();
+  };
+
+  export interface IUserPayload {
+  name: string;
+  division: number;
+}
