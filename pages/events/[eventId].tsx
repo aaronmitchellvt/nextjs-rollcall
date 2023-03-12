@@ -85,9 +85,7 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
               {eventData && eventData[0].title},{" "}
               {eventData && eventData[0].date}
             </div>
-            {session?.user.id !== undefined && eventId && (
-              <JoinEventForm eventId={eventId[0]} userId={session!.user.id} />
-            )}
+            {eventId !== undefined && <JoinEventForm eventId={eventId![0]} />}
             <div className="bg-white h-screen flex flex-col items-center pt-3 w-full">
               <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-1 ml-12 mr-12 pb-2">
                 <JoinedDivisionGroup

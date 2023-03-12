@@ -1,42 +1,20 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import supabase from "@/lib/supabase";
-import FetchedData from "./FetchedData";
-import { useSession } from "@supabase/auth-helpers-react";
-import { checkIfUserHasAlreadyPosted } from "@/services/playerServices";
+import { useState } from "react";
 
 export interface JoinEventFormProps {
   eventId: string;
-  userId: string;
 }
 
-const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
-  const session = useSession();
+const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId }) => {
   const queryClient = useQueryClient();
 
-  const {
-    isLoading: initialCheckLoading,
-    isError: initialCheckIsError,
-    data: initialCheckData,
-  } = useQuery({
-    queryKey: ["hasUserPosted"],
-    queryFn: () => checkIfUserHasAlreadyPosted(userId, eventId),
+  const [userPayload, setUserPayload] = useState<IUserPayload>({
+    name: "",
+    division: 2,
   });
-  const initialCheckIsValidData =
-    initialCheckData !== undefined && initialCheckData.data?.length !== 1;
-
-  const getUserProfile = async () => {
-    let { data } = await supabase.from("Player").select("*").eq("id", userId);
-    return data;
-  };
-
-  const getPlayerProfileQuery = useQuery({
-    queryKey: ["getPlayerProfile"],
-    queryFn: () => getUserProfile(),
-    enabled: !!session?.user.id,
-  });
-
   const eventIdNum = Number(eventId);
   //User IS attending logic
   const onWillAttend = async () => {
@@ -44,9 +22,8 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
       {
         event_id: eventIdNum,
         isIn: true,
-        user_name: getPlayerProfileQuery?.data![0].name,
-        user_id: userId,
-        user_division: getPlayerProfileQuery?.data![0].division,
+        user_name: userPayload.name,
+        user_division: Number(userPayload.division),
       },
     ]);
     return response;
@@ -54,9 +31,9 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
   const attendingEventMutation = useMutation({
     mutationFn: () => onWillAttend(),
     onSuccess: () => {
-      queryClient.invalidateQueries(["hasUserPosted"])
-      queryClient.refetchQueries(["eventPlayers"])
-    }
+      queryClient.invalidateQueries(["hasUserPosted"]);
+      queryClient.refetchQueries(["eventPlayers"]);
+    },
   });
 
   //User is NOT attending logic
@@ -65,9 +42,8 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
       {
         event_id: eventIdNum,
         isIn: false,
-        user_name: getPlayerProfileQuery?.data![0].name,
-        user_id: userId,
-        user_division: getPlayerProfileQuery?.data![0].division,
+        user_name: userPayload.name,
+        user_division: Number(userPayload.division),
       },
     ]);
     return response;
@@ -75,64 +51,79 @@ const JoinEventForm: React.FC<JoinEventFormProps> = ({ eventId, userId }) => {
   const notAttendingEventMutation = useMutation({
     mutationFn: () => onNotAttending(),
     onSuccess: () => {
-      queryClient.invalidateQueries(["hasUserPosted"])
-      queryClient.refetchQueries(["eventPlayers"])
-    }
+      queryClient.invalidateQueries(["hasUserPosted"]);
+      queryClient.refetchQueries(["eventPlayers"]);
+    },
   });
-  const postRequestIsLoading = attendingEventMutation.isLoading || notAttendingEventMutation.isLoading;
+  const postRequestIsLoading =
+    attendingEventMutation.isLoading || notAttendingEventMutation.isLoading;
 
   return (
-    <FetchedData
-      isQueryingData={initialCheckLoading}
-      isError={initialCheckIsError}
-      isValidData={initialCheckIsValidData}
-      childrenQueryingData={<></>}
-      childrenError={
-        <>
-          <h1 className="text-xl">There was an error displaying event form</h1>
-        </>
-      }
-      childrenInvalidData={<></>}
-      childrenValidData={
-        <div className="flex flex-row p-2 ml-8 text-2xl items-center font-semibold">
-          <h1 className="mr-1">Are you in?</h1>
-          <button
-            onClick={() => attendingEventMutation.mutate()}
-            className="p-1 hover:bg-green-300 h-10 w-10 rounded-lg"
-          >
-            <FontAwesomeIcon
-              icon={faCheck}
-              style={{ fontSize: 35, color: "green" }}
-            />
-          </button>
+    <div className="flex flex-row p-2 ml-8 text-2xl items-center font-semibold">
+      <label className="text-xl font-semibold mr-3">Name</label>
+      <input
+        onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setUserPayload({ ...userPayload, name: e.target.value })
+        }
+        className="border-2 rounded p-1 w-1/5"
+        value={userPayload.name}
+      />
+      <label className="text-xl font-semibold mx-3">Division</label>
+      <select
+        onChange={(e) =>
+          setUserPayload({
+            ...userPayload,
+            division: Number(e.target.value),
+          })
+        }
+        value={userPayload.division}
+        className="border-2 rounded p-1 mr-2"
+      >
+        <option value={2}>2</option>
+        <option value={3}>3</option>
+        <option value={4}>4</option>
+        <option value={5}>5</option>
+      </select>
+      <h1 className="mr-1">Are you in?</h1>
+      <button
+        onClick={() => attendingEventMutation.mutate()}
+        className="p-1 hover:bg-green-300 h-10 w-10 rounded-lg"
+      >
+        <FontAwesomeIcon
+          icon={faCheck}
+          style={{ fontSize: 35, color: "green" }}
+        />
+      </button>
 
-          <h1 className="ml-1 mr-2">Or Out?</h1>
-          <button
-            onClick={() => notAttendingEventMutation.mutate()}
-            className="p-1 hover:bg-red-300 h-10 w-10 rounded-lg"
-          >
-            <FontAwesomeIcon
-              icon={faXmark}
-              style={{ fontSize: 35, color: "red" }}
-            />
-          </button>
-          {/* Show spinner when the request is being made */}
-          {postRequestIsLoading && (
-            <div className="ml-2 flex justify-center items-center">
-              <div
-                className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
-                role="status"
-              >
-              </div>
-            </div>
-          )}
+      <h1 className="ml-1 mr-2">Or Out?</h1>
+      <button
+        onClick={() => notAttendingEventMutation.mutate()}
+        className="p-1 hover:bg-red-300 h-10 w-10 rounded-lg"
+      >
+        <FontAwesomeIcon
+          icon={faXmark}
+          style={{ fontSize: 35, color: "red" }}
+        />
+      </button>
+      {/* Show spinner when the request is being made */}
+      {postRequestIsLoading && (
+        <div className="ml-2 flex justify-center items-center">
+          <div
+            className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+            role="status"
+          ></div>
         </div>
-      }
-    ></FetchedData>
+      )}
+    </div>
   );
 };
 
 export default JoinEventForm;
+
+export interface IUserPayload {
+  name: string;
+  division: number;
+}
 
 // {!initialCheckLoading && initialCheckData?.data && initialCheckData.data.length === 0 && (
 
