@@ -1,6 +1,5 @@
-import { IUserPayload } from "@/components/layout/PrimaryLayout";
+import { IUserPayload } from "@/components/JoinEventForm";
 import supabase from "@/lib/supabase";
-import { Session } from "inspector";
 
 export async function fetchUser () {
   const { data } = await supabase.auth.getUser();
