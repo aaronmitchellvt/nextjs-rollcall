@@ -3,16 +3,21 @@ import JoinedDivisionGroup from "@/components/JoinedDivisionGroup/JoinedDivision
 import LoadingJoinedDivisionGroup from "@/components/JoinedDivisionGroup/LoadingJoinedDivisionGroup";
 import JoinEventForm from "@/components/JoinEventForm";
 import PrimaryLayout from "@/components/layout/PrimaryLayout";
+import supabase from "@/lib/supabase";
 import { fetchEventDetails, fetchEventPlayers } from "@/services/eventServices";
+import { faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useQuery } from "react-query";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { NextPageWithLayout } from "../page";
 
 export interface EventDetailsProps {}
 
 const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const eventId = router.query.eventId;
   const session = useSession();
 
@@ -48,6 +53,56 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
     return player.user_division === 5;
   });
 
+  //join event form
+  const [renderForm, setRenderForm] = useState<boolean>(true);
+  const [userPayload, setUserPayload] = useState<IUserPayload>({
+    name: "",
+    division: 2,
+  });
+  const eventIdNum = Number(eventId);
+  //User IS attending logic
+  const onWillAttend = async () => {
+    setRenderForm(false);
+    const response = await supabase.from("Joined_Players").insert([
+      {
+        event_id: eventIdNum,
+        isIn: true,
+        user_name: userPayload.name,
+        user_division: Number(userPayload.division),
+      },
+    ]);
+    return response;
+  };
+  const attendingEventMutation = useMutation({
+    mutationFn: () => onWillAttend(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["hasUserPosted"]);
+      queryClient.refetchQueries(["eventPlayers"]);
+    },
+  });
+
+  //User is NOT attending logic
+  const onNotAttending = async () => {
+    setRenderForm(false);
+    const response = await supabase.from("Joined_Players").insert([
+      {
+        event_id: eventIdNum,
+        isIn: false,
+        user_name: userPayload.name,
+        user_division: Number(userPayload.division),
+      },
+    ]);
+    return response;
+  };
+  const notAttendingEventMutation = useMutation({
+    mutationFn: () => onNotAttending(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["hasUserPosted"]);
+      queryClient.refetchQueries(["eventPlayers"]);
+    },
+  });
+  const postRequestIsLoading =
+    attendingEventMutation.isLoading || notAttendingEventMutation.isLoading;
   return (
     <PrimaryLayout>
       <FetchedData
@@ -85,7 +140,66 @@ const EventDetails: NextPageWithLayout<EventDetailsProps> = () => {
               {eventData && eventData[0].title},{" "}
               {eventData && eventData[0].date}
             </div>
-            {eventId !== undefined && <JoinEventForm eventId={eventId![0]} />}
+            {renderForm && eventId !== undefined && (
+              <>
+                <div className="flex flex-row p-2 ml-8 text-2xl items-center font-semibold">
+                  <label className="text-xl font-semibold mr-3">Name</label>
+                  <input
+                    onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setUserPayload({ ...userPayload, name: e.target.value })
+                    }
+                    className="border-2 rounded p-1 w-1/5"
+                    value={userPayload.name}
+                  />
+                  <label className="text-xl font-semibold mx-3">Division</label>
+                  <select
+                    onChange={(e) =>
+                      setUserPayload({
+                        ...userPayload,
+                        division: Number(e.target.value),
+                      })
+                    }
+                    value={userPayload.division}
+                    className="border-2 rounded p-1 mr-2"
+                  >
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={4}>4</option>
+                    <option value={5}>5</option>
+                  </select>
+                  <h1 className="mr-1">Are you in?</h1>
+                  <button
+                    onClick={() => attendingEventMutation.mutate()}
+                    className="p-1 hover:bg-green-300 h-10 w-10 rounded-lg"
+                  >
+                    <FontAwesomeIcon
+                      icon={faCheck}
+                      style={{ fontSize: 35, color: "green" }}
+                    />
+                  </button>
+
+                  <h1 className="ml-1 mr-2">Or Out?</h1>
+                  <button
+                    onClick={() => notAttendingEventMutation.mutate()}
+                    className="p-1 hover:bg-red-300 h-10 w-10 rounded-lg"
+                  >
+                    <FontAwesomeIcon
+                      icon={faXmark}
+                      style={{ fontSize: 35, color: "red" }}
+                    />
+                  </button>
+                  {/* Show spinner when the request is being made */}
+                  {postRequestIsLoading && (
+                    <div className="ml-2 flex justify-center items-center">
+                      <div
+                        className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+                        role="status"
+                      ></div>
+                    </div>
+                  )}
+                </div>{" "}
+              </>
+            )}
             <div className="bg-white h-screen flex flex-col items-center pt-3 w-full">
               <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-items-center gap-1 ml-12 mr-12 pb-2">
                 <JoinedDivisionGroup
@@ -117,4 +231,9 @@ export default EventDetails;
 export interface eventDetails {
   title?: string;
   date?: string;
+}
+
+export interface IUserPayload {
+  name: string;
+  division: number;
 }
